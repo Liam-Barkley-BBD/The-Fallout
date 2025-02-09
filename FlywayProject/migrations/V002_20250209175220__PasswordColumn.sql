@@ -1,0 +1,2 @@
+ALTER TABLE "Survivors"
+ADD COLUMN "PasswordHash" TEXT NOT NULL;

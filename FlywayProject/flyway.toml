@@ -1,0 +1,27 @@
+databaseType = "PostgreSql"
+id = "e7af398e-b4b9-4232-815f-be91ee7b0694"
+name = "FlywayProject"
+
+[flyway]
+locations = [ "filesystem:migrations" ]
+mixed = true
+outOfOrder = true
+schemaModelLocation = "schema-model"
+validateMigrationNaming = true
+
+  [flyway.check]
+  majorTolerance = 0
+
+[flywayDesktop]
+developmentEnvironment = "development"
+shadowEnvironment = "shadow"
+
+[redgateCompare]
+filterFile = "filter.rgf"
+
+[redgateCompare.postgresql.options.ignores]
+ignoreNewlinesInTextObjects = "off"
+
+[environments.FalloutDB]
+url = "jdbc:postgresql://localhost:5432/FalloutDB"
+schemas = [ "public" ]
