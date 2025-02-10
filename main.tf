@@ -1,5 +1,5 @@
 provider "aws" {
-    region = "af-south-1
+    region = "af-south-1"
 }
 
 resource "aws_security_group" "postgres_sq" {
@@ -23,12 +23,12 @@ resource "aws_security_group" "postgres_sq" {
 
 resource "aws_db_instance" "postgresql" {
     allocated_storage = 20
-    db_instance_class = "db.t3.micro"
+    instance_class = "db.t3.micro"
     engine = "postgres"
-    engine_version = "14.4"
-    instance_identifier = "fallout-db"
+    engine_version = "17.2"
+    identifier = "fallout-db"
     db_name = "FalloutDB"
-    username = "admin"
+    username = "FalloutAdmin"
     password = "TheFallout"
     publicly_accessible = true
     vpc_security_group_ids = [aws_security_group.postgres_sq.id]
