@@ -16,11 +16,12 @@ jobs:
 
       - name: Run Flyway Migrations
         run: |
-          echo $ {{ secrets.DB_HOST }}
+          echo ${{ secrets.DB_HOST }}
           docker run --rm \
             -v ${{ github.workspace }}/migrations:/flyway/migrations \
             flyway/flyway:latest \
             -url=jdbc:postgresql://${{ secrets.DB_HOST }}:5432/${{ secrets.DB_NAME }} \
             -user=${{ secrets.DB_USER }} \
             -password=${{ secrets.DB_PASS }} \
+            -locations=filesystem:/flyway/migrations \
             migrate
