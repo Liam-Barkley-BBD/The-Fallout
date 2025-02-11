@@ -1,2 +1,8 @@
 .terraform*
 terraform*
+
+# Flyway ignores
+*.user.toml
+*.artifact
+report.html
+report.json
