@@ -1,0 +1,26 @@
+name: Flyway Migrations
+
+on:
+  push:
+    branches:
+      - dev 
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Flyway Migrations
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/migrations:/flyway/migrations \
+            flyway/flyway:latest \
+            -url=jdbc:postgresql://${{ secrets.DB_HOST }}:5432/${{ secrets.DB_NAME }} \
+            -user=${{ secrets.DB_USER }} \
+            -password=${{ secrets.DB_PASS }} \
+            -connectRetries=10 \
+            migrate
