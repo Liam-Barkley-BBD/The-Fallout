@@ -16,6 +16,7 @@ jobs:
 
       - name: Run Flyway Migrations
         run: |
+          echo $ {{ secrets.DB_HOST }}
           docker run --rm \
             -v ${{ github.workspace }}/migrations:/flyway/migrations \
             flyway/flyway:latest \
