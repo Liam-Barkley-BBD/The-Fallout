@@ -6,3 +6,8 @@ terraform*
 *.artifact
 report.html
 report.json
+
+# Personal files
+flyway_clean.bat
+flyway_migrate.bat
+sql/mockdata.sql
