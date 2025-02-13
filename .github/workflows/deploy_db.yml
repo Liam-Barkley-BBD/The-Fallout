@@ -27,11 +27,15 @@ jobs:
       - name: Check existence of RDS
         id: check-db
         run: |
+          echo "Checking if RDS instance exists..."
           if aws rds describe-db-instances --db-instance-identifier ${{ env.DB_INSTANCE_IDENTIFIER }} > /dev/null 2>&1; then
             echo "DB_EXISTS=true" >> $GITHUB_ENV
+            echo "RDS instance exists."
           else
             echo "DB_EXISTS=false" >> $GITHUB_ENV
+            echo "RDS instance does not exist."
           fi
+          echo "Exit code: $?"
 
       - name: Create RDS Postgres instance if not exists
         if: env.DB_EXISTS == 'false'
