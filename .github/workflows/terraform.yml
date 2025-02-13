@@ -1,0 +1,57 @@
+name: "Terraform Deployment"
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: "Configure AWS credentials"
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+            aws-access-key-id: ${{ secrets.LIAM_ACCESS_KEY }}
+            aws-secret-access-key: ${{ secrets.LIAM_SECRET_ACCESS_KEY }}
+            #   aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+            aws-region: 'af-south-1'
+
+      - name: "Initialize Terraform"
+        run: terraform init
+
+      - name: "Terraform Apply"
+        run: terraform apply -auto-approve
+
+      - name: "Save DB Endpoint"
+        run: echo "DB_HOST=$(terraform output -raw db_endpoint)" >> $GITHUB_ENV
+      
+      - name: Create Database if not exists
+        run: |
+          echo "Checking if FalloutDB exists..."
+          DB_EXISTS=$(PGPASSWORD=${{ secrets.DB_PASS }} psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${{ secrets.DB_NAME }}'")
+          if [[ "$DB_EXISTS" != "1" ]]; then
+            echo "Creating ${{ secrets.DB_NAME }}..."
+            PGPASSWORD=${{ secrets.DB_PASS }} psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c "CREATE DATABASE ${{ secrets.DB_NAME }}"
+            echo "${{ secrets.DB_NAME }} created."
+          else
+            echo "${{ secrets.DB_NAME }} already exists."
+          fi

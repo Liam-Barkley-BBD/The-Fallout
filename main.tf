@@ -104,7 +104,7 @@ resource "aws_db_instance" "postgresql" {
   engine              = "postgres"
   engine_version      = "16.3"
   identifier          = "fallout-db-3"
-  db_name             = "FalloutDB"
+  db_name             = "falloutdb"
   storage_type        = "gp2"
   
   username            = var.db_username
