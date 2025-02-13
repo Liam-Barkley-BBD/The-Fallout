@@ -5,7 +5,8 @@ on:
     workflows: ["Deploy DB"]
     types:
       - completed
-  workflow_dispatch:
+    branches:
+      - 'dev'
 
 jobs:
   migrate:
