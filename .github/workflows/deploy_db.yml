@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_INSTANCE_IDENTIFIER: "FalloutDatabaseInstance"
-      DB_INSTANCE_CLASS: "db.t3.micro"
-      DB_STORAGE: 2
+      DB_INSTANCE_IDENTIFIER: "fallout-db-3"
+      DB_INSTANCE_CLASS: "db.t4g.micro"
+      DB_STORAGE: 20
       DB_ENGINE: "postgres"
 
     steps:
@@ -22,7 +22,7 @@ jobs:
           aws-access-key-id: ${{ secrets.LIAM_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.LIAM_SECRET_ACCESS_KEY }}
         #   aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: 'eu-west-3'
+          aws-region: 'af-south-1'
 
       - name: Check existence of RDS
         id: check-db
