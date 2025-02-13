@@ -73,17 +73,16 @@ jobs:
       - name: Create Database if not exists
         run: |
           echo "Attempting to create FalloutDB if not exists..."
-          docker run --rm \
-            -e PGPASSWORD=${{ secrets.TF_VAR_DB_PASSWORD }} \
-            postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
-            "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'FalloutDB') THEN CREATE DATABASE FalloutDB; END IF; END \$\$;"
+          PGPASSWORD=${{ secrets.DB_PASS }} psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c "
+          DO \$\$
+          BEGIN
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'FalloutDB') THEN
+              CREATE DATABASE FalloutDB;
+            END IF;
+          END
+          \$\$;"
+          echo "FalloutDB is ready."
   
-      - name: List databases
-        run: |
-          docker run --rm \
-            -e PGPASSWORD=${{ secrets.TF_VAR_DB_PASSWORD }} \
-            postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
-            "\l" 
 
       - name: Debug Connection String
         run: |
