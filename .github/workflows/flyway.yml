@@ -2,7 +2,7 @@ name: Migrations
 
 on:
   workflow_run:
-    workflows: ["Deploy DB"]
+    workflows: ["Terraform Deployment"]
     types:
       - completed
     branches:
