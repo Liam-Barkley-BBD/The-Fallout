@@ -41,8 +41,8 @@ jobs:
             --db-instance-class ${{ env.DB_INSTANCE_CLASS }} \
             --engine ${{ env.DB_ENGINE }} \
             --allocated-storage ${{ env.DB_STORAGE }} \
-            --master-username ${{ secrets.TF_VAR_DB_USERNAME }} \
-            --master-user-password ${{ secrets.TF_VAR_DB_PASSWORD }} \
+            --master-username ${{ secrets.DB_NAME }} \
+            --master-user-password ${{ secrets.DB_PASS }} \
             --backup-retention-period 7 \
             --no-multi-az
 
@@ -60,9 +60,9 @@ jobs:
       - name: Create DB
         run: |
           docker run --rm \
-            postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.TF_VAR_DB_USERNAME }} -d postgres -c \
+            postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
             "SELECT 'CREATE DATABASE FalloutDB' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'FalloutDB');"
 
       - name: Debug Connection String
         run: |
-          echo "Using connection string: postgres://${{ secrets.TF_VAR_DB_USERNAME }}:${{ secrets.TF_VAR_DB_PASSWORD }}@${{ secrets.DB_HOST }}:5432/${{ secrets.DB_NAME }}"
+          echo "Using connection string: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@${{ secrets.DB_HOST }}:5432/${{ secrets.DB_NAME }}"
