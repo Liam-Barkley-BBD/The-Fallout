@@ -2,7 +2,7 @@ name: Migrations
 
 on:
   workflow_run:
-    workflows: ["Terraform Deployment"]
+    workflows: ["Deploy DB"]
     types:
       - completed
   workflow_dispatch:
