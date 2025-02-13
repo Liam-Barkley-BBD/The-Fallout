@@ -31,6 +31,7 @@ jobs:
             echo "DB_EXISTS=true" >> $GITHUB_ENV
           else
             echo "DB_EXISTS=false" >> $GITHUB_ENV
+          fi
 
       - name: Create RDS Postgres instance if not exists
         if: env.DB_EXISTS == 'false'
