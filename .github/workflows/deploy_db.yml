@@ -70,12 +70,14 @@ jobs:
           done
           echo "Database is ready."
   
-      - name: Create DB
+      - name: Create Database if not exists
         run: |
+          echo "Attempting to create FalloutDB if not exists..."
           docker run --rm \
             -e PGPASSWORD=${{ secrets.TF_VAR_DB_PASSWORD }} \
             postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
-            "SELECT 'CREATE DATABASE FalloutDB' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'FalloutDB');"
+            "CREATE DATABASE IF NOT EXISTS FalloutDB;"
+  
 
       - name: Debug Connection String
         run: |
