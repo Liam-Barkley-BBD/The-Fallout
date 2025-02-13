@@ -5,6 +5,9 @@ ADD CONSTRAINT CHK_BeanMissions_PlannedEnd CHECK ("PlannedEnd" > "PlannedStart")
 ALTER TABLE "BeanMissions"
 ADD CONSTRAINT CHK_BeanMissions_ActualEnd CHECK ("ActualEnd" > "PlannedStart");
 
+ALTER TABLE "BeanMissions"
+ADD CONSTRAINT CHK_BeanMissions_PlannedStart CHECK ("PlannedStart" >= CURRENT_DATE);
+
 -- Procedure to create new missions
 CREATE OR REPLACE PROCEDURE InitiateMission(
     IN P_ShelterID INTEGER,
@@ -14,6 +17,18 @@ CREATE OR REPLACE PROCEDURE InitiateMission(
 LANGUAGE plpgsql
 AS $$
 BEGIN
+    -- Validation
+    IF NOT EXISTS (SELECT 1 FROM "Shelters" WHERE "ShelterID" = P_ShelterID) THEN
+        RAISE EXCEPTION 'Shelter ID % does not exist', P_ShelterID;
+    END IF;
+
+    IF P_PlannedStart < CURRENT_DATE THEN
+        RAISE EXCEPTION 'Planned start date cannot be in the past';
+    END IF;
+
+    IF P_PlannedEnd <= P_PlannedStart THEN
+        RAISE EXCEPTION 'Planned end date must be after planned start date';
+    END IF;
 
     -- Insert the new mission
     INSERT INTO "BeanMissions" ("ShelterID", "PlannedStart", "PlannedEnd")
@@ -66,7 +81,7 @@ END;
 $$;
 
 
--- Procedure to finalize a missions yields.. transactions?
+-- Procedure to finalize a missions yields
 CREATE OR REPLACE PROCEDURE EndMission(
     IN P_BeanMissionID INTEGER,
     IN P_ActualEnd DATE
@@ -77,15 +92,11 @@ DECLARE
     V_ShelterID INTEGER;
     V_CannedBeanID INTEGER;
     V_NumberOfCans INTEGER;
-    V_ActualEnd INTEGER;
+    V_ActualEnd DATE;
 BEGIN
     -- Validation
     IF NOT EXISTS (SELECT 1 FROM "BeanMissions" WHERE "BeanMissionID" = P_BeanMissionID) THEN
         RAISE EXCEPTION 'Mission ID % does not exist', P_BeanMissionID;
-    END IF;
-
-    IF P_ActualEnd < (SELECT "PlannedStart" FROM "BeanMissions" WHERE "BeanMissionID" = P_BeanMissionID) THEN
-        RAISE EXCEPTION 'Actual End Date cannot be earlier than the Planned Start Date';
     END IF;
 
     -- Cannot finalize a mission again
@@ -97,6 +108,9 @@ BEGIN
         RAISE EXCEPTION 'Cannot finalize a mission that has already ended';
     END IF;
 
+    IF P_ActualEnd < (SELECT "PlannedStart" FROM "BeanMissions" WHERE "BeanMissionID" = P_BeanMissionID) THEN
+        RAISE EXCEPTION 'Actual End Date cannot be earlier than the Planned Start Date';
+    END IF;
 
     -- Get ShelterID for the mission
     SELECT "ShelterID" INTO V_ShelterID 
