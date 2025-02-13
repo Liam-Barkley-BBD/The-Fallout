@@ -1,27 +1,27 @@
 name: Migrations
 
 on:
-  push:
-    branches:
-      - dev 
+  workflow_run:
+    workflows: ["Terraform Deployment"]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
   migrate:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Run Flyway Migrations
         run: |
-          echo ${{ secrets.DB_HOST }}
+          echo "Running migrations on DB: ${{ secrets.DB_HOST }}"
           docker run --rm \
             -v ${{ github.workspace }}/migrations:/flyway/migrations \
             flyway/flyway:latest \
             -url=jdbc:postgresql://${{ secrets.DB_HOST }}:5432/${{ secrets.DB_NAME }} \
-            -user=${{ secrets.DB_USER }} \
-            -password=${{ secrets.DB_PASS }} \
+            -user=${{ secrets.TF_VAR_DB_USERNAME }} \
+            -password=${{ secrets.TF_VAR_DB_PASSWORD }} \
             -locations=filesystem:/flyway/migrations \
             migrate
