@@ -60,9 +60,10 @@ jobs:
       - name: Create DB
         run: |
           docker run --rm \
-            postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
-            "SELECT 'CREATE DATABASE FalloutDB' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'FalloutDB');"
-          ${{ secrets.DB_PASS }}
+          -e PGPASSWORD=${{ secrets.TF_VAR_DB_PASSWORD }} \
+          postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
+          "SELECT 'CREATE DATABASE FalloutDB' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'FalloutDB');"
+  
 
       - name: Debug Connection String
         run: |
