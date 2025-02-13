@@ -61,13 +61,21 @@ jobs:
           ENDPOINT=$(aws rds describe-db-instances --db-instance-identifier ${{ env.DB_INSTANCE_IDENTIFIER }} --query 'DBInstances[0].Endpoint.Address' --output text)
           echo "RDS_ENDPOINT=$ENDPOINT" >> $GITHUB_ENV
 
+      - name: Wait for DB to accept connections
+        run: |
+          echo "Waiting for DB to accept connections..."
+          until pg_isready -h ${{ secrets.DB_HOST }} -p 5432 -U ${{ secrets.DB_USER }}; do
+            echo "Waiting for database to be ready..."
+            sleep 5
+          done
+          echo "Database is ready."
+  
       - name: Create DB
         run: |
           docker run --rm \
-          -e PGPASSWORD=${{ secrets.TF_VAR_DB_PASSWORD }} \
-          postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
-          "SELECT 'CREATE DATABASE FalloutDB' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'FalloutDB');"
-  
+            -e PGPASSWORD=${{ secrets.TF_VAR_DB_PASSWORD }} \
+            postgres psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d postgres -c \
+            "SELECT 'CREATE DATABASE FalloutDB' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'FalloutDB');"
 
       - name: Debug Connection String
         run: |
