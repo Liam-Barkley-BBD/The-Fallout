@@ -4,6 +4,6 @@ services:
   terraform:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: terraform/Dockerfile
     volumes:
-      - ./:/workspace
+      - ./terraform:/workspace
