@@ -6,7 +6,8 @@ on:
     types:
       - completed
     branches:
-      - 'dev'
+      - dev
+      - main
 
 jobs:
   migrate:
