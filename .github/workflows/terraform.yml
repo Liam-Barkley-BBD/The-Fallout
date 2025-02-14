@@ -41,6 +41,15 @@ jobs:
       - name: "Initialize Terraform"
         run: terraform init
 
+      - name: "Check if DB Subnet Group Exists"
+        run: |
+            if aws rds describe-db-subnet-groups --db-subnet-group-name rds-subnet-group 2>&1 | grep -q "DBSubnetGroupNotFoundFault"; then
+            echo "Subnet group does not exist, proceeding with Terraform apply."
+            else
+            echo "Importing existing subnet group into Terraform..."
+            terraform import aws_db_subnet_group.rds_subnet_group rds-subnet-group || echo "Already imported."
+            fi
+
       - name: "Terraform Apply"
         run: terraform apply -auto-approve
 
