@@ -15,16 +15,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: "Download DB Info Artifact"
-        uses: actions/download-artifact@v4
-        with:
-          name: db-info
-
-      - name: "Load DB Info"
-        run: |
-          echo "DB_HOST=$(cat db_host.txt)" >> $GITHUB_ENV
-          echo "DB_PORT=$(cat db_port.txt)" >> $GITHUB_ENV
-
       - name: Run Flyway Migrations
         run: |
           echo "Running migrations on DB: ${{ secrets.DB_NAME }}:${{ secrets.DB_PORT }}"
