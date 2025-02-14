@@ -26,7 +26,7 @@ BEGIN
         RAISE EXCEPTION 'Planned start date cannot be in the past';
     END IF;
 
-    IF P_PlannedEnd <= P_PlannedStart THEN
+    IF P_PlannedEnd >= P_PlannedStart THEN
         RAISE EXCEPTION 'Planned end date must be after planned start date';
     END IF;
 

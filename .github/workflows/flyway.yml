@@ -2,7 +2,7 @@ name: Migrations
 
 on:
   workflow_run:
-    workflows: ["Terraform Deployment"]
+    workflows: ["DB Deployment"]
     types:
       - completed
     branches:
@@ -27,11 +27,11 @@ jobs:
 
       - name: Run Flyway Migrations
         run: |
-          echo "Running migrations on DB: $DB_HOST:$DB_PORT"
+          echo "Running migrations on DB: ${{ secrets.DB_NAME }}:${{ secrets.DB_PORT }}"
           docker run --rm \
             -v ${{ github.workspace }}/migrations:/flyway/migrations \
             flyway/flyway:latest \
-            -url=jdbc:postgresql://$DB_HOST:$DB_PORT/${{ secrets.DB_NAME }} \
+            -url=jdbc:postgresql://${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }} \
             -user=${{ secrets.DB_USER }} \
             -password=${{ secrets.DB_PASS }} \
             -locations=filesystem:/flyway/migrations \

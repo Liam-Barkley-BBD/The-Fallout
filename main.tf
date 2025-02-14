@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "af-south-1"
-}
-
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -23,7 +19,7 @@ resource "aws_internet_gateway" "main" {
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "af-south-1a"
+  availability_zone       = "eu-west-1a"
   map_public_ip_on_launch = true
 
   tags = {
@@ -34,7 +30,7 @@ resource "aws_subnet" "public_1" {
 resource "aws_subnet" "public_2" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.2.0/24"
-  availability_zone       = "af-south-1b"
+  availability_zone       = "eu-west-1b"
   map_public_ip_on_launch = true
 
   tags = {
@@ -103,7 +99,7 @@ resource "aws_db_instance" "postgresql" {
   instance_class      = "db.t4g.micro"
   engine              = "postgres"
   engine_version      = "16.3"
-  identifier          = "fallout-db-31"
+  identifier          = "fallout-db-3"
   db_name             = "falloutdb"
   storage_type        = "gp2"
 

@@ -1,0 +1,9 @@
+# From Adrian Hawkins -- DISB Collegue
+
+services:
+  terraform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/workspace
