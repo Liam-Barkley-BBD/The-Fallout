@@ -103,7 +103,7 @@ resource "aws_db_instance" "postgresql" {
   instance_class      = "db.t4g.micro"
   engine              = "postgres"
   engine_version      = "16.3"
-  identifier          = "fallout-db-3"
+  identifier          = "fallout-db-31"
   db_name             = "falloutdb"
   storage_type        = "gp2"
 

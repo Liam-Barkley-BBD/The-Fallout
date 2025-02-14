@@ -50,6 +50,9 @@ jobs:
             terraform import aws_db_subnet_group.rds_subnet_group rds-subnet-group || echo "Already imported."
             fi
 
+      - name: "Terraform Plan"
+        run: terraform plan
+
       - name: "Terraform Apply"
         run: terraform apply -auto-approve
 
