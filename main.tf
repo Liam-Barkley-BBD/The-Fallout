@@ -106,7 +106,7 @@ resource "aws_db_instance" "postgresql" {
   identifier          = "fallout-db-3"
   db_name             = "falloutdb"
   storage_type        = "gp2"
-  
+
   username            = var.db_username
   password            = var.db_password
   
@@ -130,5 +130,12 @@ output "db_port" {
 }
 
 # use environment variables for security
-variable "db_username" {}
-variable "db_password" {}
+variable "db_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "db_password" {
+  type      = string
+  sensitive = true
+}

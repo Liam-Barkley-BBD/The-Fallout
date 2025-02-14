@@ -15,14 +15,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: "Download DB Info Artifact"
+        uses: actions/download-artifact@v3
+        with:
+          name: db-info
+
+      - name: "Load DB Info"
+        run: |
+          echo "DB_HOST=$(cat db_host.txt)" >> $GITHUB_ENV
+          echo "DB_PORT=$(cat db_port.txt)" >> $GITHUB_ENV
+
       - name: Run Flyway Migrations
         run: |
-          echo "Running migrations on DB: ${{ secrets.DB_HOST }}"
+          echo "Running migrations on DB: $DB_HOST:$DB_PORT"
           docker run --rm \
             -v ${{ github.workspace }}/migrations:/flyway/migrations \
             flyway/flyway:latest \
-            -url=jdbc:postgresql://${{ secrets.DB_HOST }}:5432/${{ secrets.DB_NAME }} \
-            -user=${{ secrets.TF_VAR_DB_USERNAME }} \
-            -password=${{ secrets.TF_VAR_DB_PASSWORD }} \
+            -url=jdbc:postgresql://$DB_HOST:$DB_PORT/${{ secrets.DB_NAME }} \
+            -user=${{ secrets.DB_USER }} \
+            -password=${{ secrets.DB_PASS }} \
             -locations=filesystem:/flyway/migrations \
             migrate
