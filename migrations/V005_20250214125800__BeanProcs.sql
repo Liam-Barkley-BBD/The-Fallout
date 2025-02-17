@@ -67,7 +67,7 @@ BEGIN
 
     IF V_Exists = 0 THEN -- No records with that CannedBeanID was found
         RAISE EXCEPTION 'CannedBeanID % does not exist', P_CannedBeanID;
-    END IF
+    END IF;
 
     -- Performing the update
     UPDATE "CannedBeans"
@@ -103,7 +103,7 @@ BEGIN
 
     If V_Exists = 0 THEN
         RAISE EXCEPTION 'CannedBeanID % does not exist', P_CannedBeanID;
-    END IF
+    END IF;
 
     -- Get outta here (Performing the delete)
     DELETE FROM "CannedBeans"
@@ -268,7 +268,7 @@ $$;
 -- Approving a BeanRequest
 
 CREATE OR REPLACE PROCEDURE ApproveBeanRequest(
-    IN P_BeanRequestID INTEGER,
+    IN P_BeanRequestID INTEGER
 )
 LANGUAGE plpgsql
 AS $$
