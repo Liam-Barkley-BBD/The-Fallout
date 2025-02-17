@@ -1,3 +1,12 @@
+ALTER TABLE "BeanMissions" DROP COLUMN "ActualEnd";
+ALTER TABLE "BeanMissions" RENAME COLUMN "PlannedStart" TO "StartDate";
+ALTER TABLE "BeanMissions" RENAME COLUMN "PlannedEnd" TO "EndDate";
+
+-- Add missing dates constraints for BeanMissions table
+ALTER TABLE "BeanMissions"
+ADD CONSTRAINT CHK_BeanMissions_StartDateEndDate CHECK ("StartDate" < "EndDate");
+ALTER TABLE "BeanMissions"
+ADD CONSTRAINT CHK_BeanMissions_EndDate CHECK ("EndDate" <= CURRENT_DATE);
 
 /*
     Helper Functions
