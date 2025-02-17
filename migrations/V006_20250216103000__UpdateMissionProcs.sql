@@ -319,6 +319,7 @@ AS $$
 DECLARE
     V_ShelterID INTEGER;
     V_MissionShelterID INTEGER;
+    V_BeanMissionID INTEGER;
 BEGIN
 
     /* Mission yield delete validation */
@@ -330,14 +331,18 @@ BEGIN
     V_ShelterID := ValidateSurvivorAsManager(P_SurvivorID);
 
     /* Validate operational rights */
+    SELECT "BeanMissionID" INTO V_BeanMissionID
+    FROM "MissionYieldItems"
+    WHERE "MissionYieldItemID" = P_MissionYieldItemID;
+
     SELECT "ShelterID" INTO V_MissionShelterID
     FROM "BeanMissions"
-    WHERE "BeanMissionID" = P_BeanMissionID;
+    WHERE "BeanMissionID" = V_BeanMissionID;
 
     PERFORM ValidateManagerShelter(V_ShelterID, V_MissionShelterID);
 
     -- Delete mission
-    DELETE FROM "MissionYieldItemID"
+    DELETE FROM "MissionYieldItems"
     WHERE "MissionYieldItemID" = P_MissionYieldItemID;
 
     RAISE NOTICE 'MissionYieldItemID % has been deleted.', P_MissionYieldItemID;

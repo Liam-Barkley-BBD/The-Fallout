@@ -53,3 +53,9 @@ SELECT * FROM TotalMissionYields;
 CALL UpdateMissionYield(3, 1, 1, 2, 1) -- now inventory is out of sync
 SELECT * FROM MissionYields;
 SELECT * FROM TotalMissionYields;
+
+-- delete mission
+CALL DeleteMission(3, 1)
+
+CALL DeleteMissionYield(3, 1)
+CALL DeleteMissionYield(3, 2)
