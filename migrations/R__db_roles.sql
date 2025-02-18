@@ -42,6 +42,7 @@ $$;
 ---------------------------------------------------------------
 -- ## GROUP
 CALL create_role(role_name => 'FalloutAdminGroup');
+ALTER ROLE FalloutAdminGroup WITH BYPASSRLS;
 
 -- ### DB LEVEL PERMISSIONS
 -- Allow creation of temporary tables on the database
@@ -57,7 +58,7 @@ TO FalloutAdminGroup;
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow all except deleting on all tables in the public schema
-GRANT SELECT, INSERT, UPDATE, REFERENCES, TRIGGER, MAINTAIN
+GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRIGGER, MAINTAIN
 ON ALL TABLES IN SCHEMA public 
 TO FalloutAdminGroup;
 
