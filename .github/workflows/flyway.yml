@@ -15,10 +15,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Run Flyway Migrations
         run: |
-          echo "Running migrations on DB: ${{ secrets.DB_NAME }}:${{ secrets.DB_PORT }}"
+          echo "Running migrations on DB: ${{ secrets.DB_NAME }}:${{ secrets.DB_PORT }} using branch ${{ github.event.workflow_run.head_branch }}"
           docker run --rm \
             -v ${{ github.workspace }}/migrations:/flyway/migrations \
             flyway/flyway:latest \
