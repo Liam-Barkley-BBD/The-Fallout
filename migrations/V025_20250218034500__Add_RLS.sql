@@ -61,19 +61,3 @@ USING (
     AND ss."ShelterID" = current_setting('app.current_shelter')::INTEGER
   )
 );
-
-ALTER TABLE "BeanRequestItem"
-ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY shelter_bean_requests_isolation_policy on "BeanRequestItem"
-USING (
-  EXISTS (
-    SELECT 1
-    FROM "Survivors" s 
-      INNER JOIN "ShelterSurvivors" ss ON s."SurvivorID" = ss."SurvivorID"
-      INNER JOIN "BeanRequests" br ON ss."SurvivorID" = br."SurvivorID"
-    WHERE ss."SurvivorID" = br."SurvivorID"
-      AND "BeanRequestItem"."BeanRequestID" = br."BeanRequestID"
-      AND ss."ShelterID" = current_setting('app.current_shelter')::INTEGER
-  )
-);
