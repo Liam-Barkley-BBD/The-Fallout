@@ -3,17 +3,17 @@
 -- ============================================
 
 -- Active Shelters Overview
--- Retrieves currently active shelters with their capacity, current population, and supply levels.
+-- Retrieves currently active shelters with their capacity, current population, and population utilization.
 
 GO
 DROP VIEW IF EXISTS ActiveShelters;
 
-GO
+go
 CREATE VIEW ActiveShelters
 AS
   SELECT *
   FROM "Shelters"
-  WHERE "DecommisionDate" is NULL;
+  WHERE "DecommissionDate" is NULL;
 
 GO
 DROP VIEW IF EXISTS ActiveSheltersOverview;
@@ -37,54 +37,30 @@ AS
         cb."CannedBeanID"
     ),
     ShelterPopulation
-    as
+    AS
     (
-    	select
+    	 SELECT
     		acts."ShelterID",
-    		COUNT (ss."SurvivorID") as "Population"
-    	from
+    		COUNT (ss."SurvivorID") AS "Population"
+    	FROM
     		ActiveShelters acts
-    		inner join "ShelterSurvivors" ss on ss."ShelterID" = acts."ShelterID"
+    		INNER JOIN "ShelterSurvivors" ss ON ss."ShelterID" = acts."ShelterID"
 		group by acts."ShelterID"
     )
   SELECT
     active."ShelterID",
     active."PopulationCapacity",
-    active."SupplyVolume",
     active."Latitude",
     active."Longitude",
     active."EstablishedDate",
     scb."TotalGramsOfBeans",
     sp."Population",
-    (scb."TotalGramsOfBeans" / active."SupplyVolume") as "StorageUtilization",
-    (sp."Population"::float8 / active."PopulationCapacity"::float8) as "PopulationUtilization"
+    (sp."Population"::float8 / active."PopulationCapacity"::float8) AS "PopulationUtilization"
   FROM
     ActiveShelters active
     INNER JOIN ShelterPopulation sp ON active."ShelterID" = sp."ShelterID"
     INNER JOIN ShelterCannedBeans scb ON active."ShelterID" = scb."ShelterID"
 
-GO
-SELECT * FROM ActiveSheltersOverview
-
--- Shelter Population Report
--- Shows the number of survivors per shelter along with capacity utilization.
-
-GO
-DROP VIEW IF EXISTS ShelterPopulationReport
-
-GO
-CREATE VIEW ShelterPopulationReport
-AS
-  SELECT
-    aso."ShelterID",
-    aso."PopulationCapacity",
-    aso."Population",
-    (aso."Population"::float8 / aso."PopulationCapacity"::float8) AS "PopulationCapacityUtilization"
-  FROM ActiveSheltersOverview aso
-
--- Shelter Supply Levels
--- Summarizes available supplies in each shelter, including canned beans and other relevant resources.
-  
 -- Decommissioned Shelters
 -- Lists shelters that have been decommissioned, including their operational duration.
 
@@ -97,27 +73,26 @@ AS
   SELECT
     shelters."ShelterID",
     shelters."PopulationCapacity",
-    shelters."SupplyVolume",
     shelters."Latitude",
     shelters."Longitude",
     shelters."EstablishedDate",
-    shelters."DecommisionDate",
-    (shelters."DecommisionDate" - shelters."EstablishedDate") AS "DaysInOperation"
+    shelters."DecommissionDate",
+    (shelters."DecommissionDate" - shelters."EstablishedDate") AS "DaysInOperation"
   FROM "Shelters" shelters
-  WHERE "DecommisionDate" is NOT NULL;
+  WHERE "DecommissionDate" is NOT NULL;
 
 -- Shelter Managers Report
 -- Displays managers assigned to each shelter.
 
-select 
+ SELECT 
 	m."ManagerID",
 	m."SurvivorID",
 	s."BirthDate",
 	s."DeceasedDate",
 	s."FirstName",
 	s."LastName" 
-from "Managers" m
-inner join "Survivors" s on m."SurvivorID" = s."SurvivorID" 
+FROM "Managers" m
+INNER JOIN "Survivors" s ON m."SurvivorID" = s."SurvivorID" 
 
 
 -- ============================================
@@ -127,7 +102,7 @@ inner join "Survivors" s on m."SurvivorID" = s."SurvivorID"
 -- Survivor Demographics
 -- Provides a breakdown of survivors by age group, shelter, and overall population trends.
 
-select 
+ SELECT 
 	s."SurvivorID",
 	s."FirstName",
 	s."LastName",
@@ -136,59 +111,11 @@ select
       WHEN s."BirthDate" between NOW() - interval '18 years' and NOW() THEN 'Child'
       WHEN s."BirthDate" between NOW() - interval '60 years' and NOW() THEN 'Adult'
       else 'Pensioner'
-	end as "AgeGroup"
-from "Survivors" s 
-where s."DeceasedDate" is NULL
-
--- ============================================
--- BEAN SUPPLY & DISTRIBUTION REPORTS
--- ============================================
-
--- Bean Requests Status Report
--- Displays pending and approved bean requests by survivors.
-
--- Bean Supply Inventory
--- Shows the current stock of canned beans at each shelter.
-
--- Bean Consumption History
--- Provides a record of all consumed canned beans by shelter and date.
-
--- Bean Request vs. Supply Analysis
--- Compares total requested beans vs. supplied beans per shelter. 
+	end AS "AgeGroup"
+FROM "Survivors" s 
+where s."DeceasedDate" is NULL 
 	
-
--- ============================================
--- MISSION REPORTS
--- ============================================
-
--- Average Time between missions per shelter
-
--- Upcoming Bean Missions
--- Lists planned bean delivery missions with start and end dates.
-
--- Completed Bean Missions & Yields
--- Displays completed missions, including the number of beans delivered.
-
--- Mission Efficiency Report
--- Compares planned vs. actual completion times for bean missions.
-
--- Bean Yield Analysis
--- Breaks down bean types and quantities collected from missions.
-
--- ============================================
--- PERFORMANCE & TRENDS REPORTS
--- ============================================
-
--- Shelter Population Growth Trends
--- Shows population trends over time for each shelter.
-
--- Bean Supply & Demand Trends
--- Analyzes patterns of bean requests and consumption over time.
-
-
--- Shelter Performance Report
--- Compares shelters based on resource efficiency, population stability, and management effectiveness.
-
+---
 create or replace function getPeriods
 (
 	endDate Date default NOW()::Date,
@@ -197,33 +124,33 @@ create or replace function getPeriods
 )
    returns setof record
    language sql
-  as
+  AS
 $$
-   with
+   WITH
 	RECURSIVE Periods
-	as 
+	AS 
 	(
-		select 1 as "PeriodNumber", endDate::DATE as "LastDate", (endDate - intervals)::DATE as "FirstDate", numPeriods as "NumPeriods"
+		 SELECT 1 AS "PeriodNumber", endDate::DATE AS "LastDate", (endDate - intervals)::DATE AS "FirstDate", numPeriods AS "NumPeriods"
 		union all
-		select (1+ "PeriodNumber") as "PeriodNumber", ("FirstDate" - interval '1 DAY')::DATE as "LastDate", ("LastDate" - intervals)::DATE as "FirstDate", "NumPeriods"
-		from Periods
+		 SELECT (1+ "PeriodNumber") AS "PeriodNumber", ("FirstDate" - interval '1 DAY')::DATE AS "LastDate", ("LastDate" - intervals)::DATE AS "FirstDate", "NumPeriods"
+		FROM Periods
 		where "PeriodNumber" < "NumPeriods"
 	)
-	select * from Periods;
+	 SELECT * FROM Periods;
 $$;
 
 -- Shows total number of cans and grams of beans accumulated through
 -- missions by a shelter over a n periods of time leading up to today
-with 
+WITH 
 	Periods
-	as
+	AS
 	(
-	select * from getPeriods(NOW()::DATE, interval '1 month', 24) as t("PeriodNumber" INT, "PeriodEndDate" DATE, "PeriodStartDate" DATE, "NumPeriods" INT)
+		 SELECT * FROM getPeriods(NOW()::DATE, interval '1 month', 24) AS t("PeriodNumber" INT, "PeriodEndDate" DATE, "PeriodStartDate" DATE, "NumPeriods" INT)
 	),
 	PeriodicBeanMissions
-	as
+	AS
 	(
-	select 
+	 SELECT 
 		bm."BeanMissionID",
 		bm."ShelterID",
 		bm."StartDate",
@@ -232,39 +159,39 @@ with
 		p."PeriodEndDate",
 		p."PeriodStartDate", 
 		p."NumPeriods"
-	from 
+	FROM 
 		"BeanMissions" bm
-		inner join Periods p on bm."EndDate" between p."PeriodStartDate" and p."PeriodEndDate" --+ interval '1 day'
+		INNER JOIN Periods p ON bm."EndDate" between p."PeriodStartDate" and p."PeriodEndDate" --+ interval '1 day'
 	),
 	MissionYieldSummary
-	as
+	AS
 	(
-		select 
+		 SELECT 
 			myi."BeanMissionID",
-			SUM(myi."NumberOfCans") as "TotalNumberOfCans",
-			SUM (myi."NumberOfCans" * cb."Grams") as "TotalGramsOfBeans"
-		from "MissionYieldItems" myi 
-		inner join "CannedBeans" cb on cb."CannedBeanID" = myi."CannedBeanID"
+			SUM(myi."NumberOfCans") AS "TotalNumberOfCans",
+			SUM (myi."NumberOfCans" * cb."Grams") AS "TotalGramsOfBeans"
+		FROM "MissionYieldItems" myi 
+		INNER JOIN "CannedBeans" cb ON cb."CannedBeanID" = myi."CannedBeanID"
 		group by myi."BeanMissionID"
 	),
 	FullMissionYieldSummary
-	as 
+	AS 
 	(
-		select "BeanMissionID", "TotalNumberOfCans", "TotalGramsOfBeans" from MissionYieldSummary
+		 SELECT "BeanMissionID", "TotalNumberOfCans", "TotalGramsOfBeans" FROM MissionYieldSummary
 		union ALL
-		select 
+		 SELECT 
 			bm."BeanMissionID",
-			0 as "TotalNumberOfCans",
-			0 as "TotalGramsOfBeans"
-		from "BeanMissions" bm
+			0 AS "TotalNumberOfCans",
+			0 AS "TotalGramsOfBeans"
+		FROM "BeanMissions" bm
 		WHERE NOT EXISTS (
    			 SELECT 1 FROM MissionYieldSummary mys WHERE mys."BeanMissionID" = bm."BeanMissionID"
 		)
 	),
 	PeriodicBeanMissionYields
-	as
+	AS
 	(
-		select distinct
+		 SELECT distinct
 			pbm."ShelterID",
 			pbm."StartDate",
 			pbm."EndDate",
@@ -274,14 +201,14 @@ with
 			pbm."NumPeriods",
 			fmys."TotalNumberOfCans",
 			fmys."TotalGramsOfBeans"
-		from 
+		FROM 
 			PeriodicBeanMissions pbm
-			inner join FullMissionYieldSummary fmys on pbm."BeanMissionID" = fmys."BeanMissionID"
+			INNER JOIN FullMissionYieldSummary fmys ON pbm."BeanMissionID" = fmys."BeanMissionID"
 	),
 	CombinedMissionYieldsForPeriod
-	as
+	AS
 	(
-		select
+		 SELECT
 			pbm."ShelterID",
 			pbm."PeriodStartDate",
 			pbm."PeriodEndDate",
@@ -289,15 +216,14 @@ with
 			pbm."EndDate",
 			fmys."TotalNumberOfCans",
 			fmys."TotalGramsOfBeans"
-		from 
+		FROM 
 			PeriodicBeanMissions pbm
-			inner join FullMissionYieldSummary fmys on pbm."BeanMissionID" = fmys."BeanMissionID"
+			INNER JOIN FullMissionYieldSummary fmys ON pbm."BeanMissionID" = fmys."BeanMissionID"
 	)
-select * from CombinedMissionYieldsForPeriod
+ SELECT * FROM CombinedMissionYieldsForPeriod
 
-select * from "BeanMissions" bm 
 	
-	-------------------------------------------------
+-------------------------------------------------
 	
 create or replace function getFuturePeriods
 (
@@ -307,40 +233,38 @@ create or replace function getFuturePeriods
 )
    returns setof record
    language sql
-  as
+  AS
 $$
-   with
+   WITH
 	RECURSIVE Periods
-	as 
+	AS 
 	(
-		select 1 as "PeriodNumber", startDate::DATE as "PeriodStartDate", (startDate + intervals)::DATE as "PeriodEndDate", numPeriods as "NumPeriods"
+		 SELECT 1 AS "PeriodNumber", startDate::DATE AS "PeriodStartDate", (startDate + intervals)::DATE AS "PeriodEndDate", numPeriods AS "NumPeriods"
 		union all
-		select (1+ "PeriodNumber") as "PeriodNumber", ("PeriodEndDate" + interval '1 DAY')::DATE as "PeriodStartDate", ("PeriodEndDate" + intervals)::DATE as "PeriodEndDate", "NumPeriods"
-		from Periods
+		 SELECT (1+ "PeriodNumber") AS "PeriodNumber", ("PeriodEndDate" + interval '1 DAY')::DATE AS "PeriodStartDate", ("PeriodEndDate" + intervals)::DATE AS "PeriodEndDate", "NumPeriods"
+		FROM Periods
 		where "PeriodNumber" < "NumPeriods"
 	)
-	select * from Periods;
+	 SELECT * FROM Periods;
 $$;
 	
-
-select * from getFuturePeriods(NOW()::DATE, interval '1 month', 4) as t("PeriodNumber" INT, "PeriodStartDate" DATE, "PeriodEndDate" DATE, "NumPeriods" INT)
-
 -- y = ax + b
 -- total number of beans = regr_slope(historical number of beans, periodEndDate) current currentDate + regr_intercept(historical number of beans, periodEndDate)
 
 -- Shows projected total number of cans and grams of beans accumulated through
--- missions by a shelter over a n periods of time into the future starting from today
+-- missions by a shelter over a n periods of time into the future starting FROM today
 -- the query uses simple linear regression to predict future values
-with 
+select * from "MissionYieldItems"
+WITH 
 	Periods
-	as
+	AS
 	(
-	select * from getPeriods(NOW()::DATE, interval '1 month', 24) as t("PeriodNumber" INT, "PeriodEndDate" DATE, "PeriodStartDate" DATE, "NumPeriods" INT)
+	 SELECT * FROM getPeriods(NOW()::DATE, interval '1 month', 24) AS t("PeriodNumber" INT, "PeriodEndDate" DATE, "PeriodStartDate" DATE, "NumPeriods" INT)
 	),
 	PeriodicBeanMissions
-	as
+	AS
 	(
-	select 
+	 SELECT 
 		bm."BeanMissionID",
 		bm."ShelterID",
 		bm."StartDate",
@@ -349,39 +273,39 @@ with
 		p."PeriodEndDate",
 		p."PeriodStartDate", 
 		p."NumPeriods"
-	from 
+	FROM 
 		"BeanMissions" bm
-		inner join Periods p on bm."EndDate" between p."PeriodStartDate" and p."PeriodEndDate" --+ interval '1 day'
+		INNER JOIN Periods p ON bm."EndDate" between p."PeriodStartDate" and p."PeriodEndDate" --+ interval '1 day'
 	),
 	MissionYieldSummary
-	as
+	AS
 	(
-		select 
+		 SELECT 
 			myi."BeanMissionID",
-			SUM(myi."NumberOfCans") as "TotalNumberOfCans",
-			SUM (myi."NumberOfCans" * cb."Grams") as "TotalGramsOfBeans"
-		from "MissionYieldItems" myi 
-		inner join "CannedBeans" cb on cb."CannedBeanID" = myi."CannedBeanID"
+			SUM(myi."NumberOfCans") AS "TotalNumberOfCans",
+			SUM (myi."NumberOfCans" * cb."Grams") AS "TotalGramsOfBeans"
+		FROM "MissionYieldItems" myi 
+		INNER JOIN "CannedBeans" cb ON cb."CannedBeanID" = myi."CannedBeanID"
 		group by myi."BeanMissionID"
 	),
 	FullMissionYieldSummary
-	as 
+	AS 
 	(
-		select "BeanMissionID", "TotalNumberOfCans", "TotalGramsOfBeans" from MissionYieldSummary
+		 SELECT "BeanMissionID", "TotalNumberOfCans", "TotalGramsOfBeans" FROM MissionYieldSummary
 		union ALL
-		select 
+		 SELECT 
 			bm."BeanMissionID",
-			0 as "TotalNumberOfCans",
-			0 as "TotalGramsOfBeans"
-		from "BeanMissions" bm
+			0 AS "TotalNumberOfCans",
+			0 AS "TotalGramsOfBeans"
+		FROM "BeanMissions" bm
 		WHERE NOT EXISTS (
    			 SELECT 1 FROM MissionYieldSummary mys WHERE mys."BeanMissionID" = bm."BeanMissionID"
 		)
 	),
 	PeriodicBeanMissionYields
-	as
+	AS
 	(
-		select distinct
+		 SELECT distinct
 			pbm."ShelterID",
 			pbm."StartDate",
 			pbm."EndDate",
@@ -391,14 +315,14 @@ with
 			pbm."NumPeriods",
 			fmys."TotalNumberOfCans",
 			fmys."TotalGramsOfBeans"
-		from 
+		FROM 
 			PeriodicBeanMissions pbm
-			inner join FullMissionYieldSummary fmys on pbm."BeanMissionID" = fmys."BeanMissionID"
+			INNER JOIN FullMissionYieldSummary fmys ON pbm."BeanMissionID" = fmys."BeanMissionID"
 	),
 	CombinedMissionYieldsForPeriod
-	as
+	AS
 	(
-		select
+		 SELECT
 			pbm."ShelterID",
 			pbm."PeriodStartDate",
 			pbm."PeriodEndDate",
@@ -406,35 +330,35 @@ with
 			pbm."EndDate",
 			fmys."TotalNumberOfCans",
 			fmys."TotalGramsOfBeans"
-		from 
+		FROM 
 			PeriodicBeanMissions pbm
-			inner join FullMissionYieldSummary fmys on pbm."BeanMissionID" = fmys."BeanMissionID"
+			INNER JOIN FullMissionYieldSummary fmys ON pbm."BeanMissionID" = fmys."BeanMissionID"
 	),
 	RegressionCoefficientsForShelter24 
-	as 
+	AS 
 	(
-		select
+		 SELECT
 			hd."ShelterID",
-			regr_slope(hd."TotalNumberOfCans"::Int, extract(epoch from (hd."PeriodEndDate"))::INT) as "SlopeCans",
-			regr_intercept(hd."TotalNumberOfCans"::Int, extract(epoch from (hd."PeriodEndDate"))::INT) as "InterceptCans",
-			regr_slope(hd."TotalGramsOfBeans"::Int, extract(epoch from (hd."PeriodEndDate"))::INT) as "SlopeGrams",
-			regr_intercept(hd."TotalGramsOfBeans"::Int, extract(epoch from (hd."PeriodEndDate"))::INT) as "InterceptGrams"
-		from 
-			(select * from CombinedMissionYieldsForPeriod cmyfp
-			) as hd
+			regr_slope(hd."TotalNumberOfCans"::Int, extract(epoch FROM (hd."PeriodEndDate"))::INT) AS "SlopeCans",
+			regr_intercept(hd."TotalNumberOfCans"::Int, extract(epoch FROM (hd."PeriodEndDate"))::INT) AS "InterceptCans",
+			regr_slope(hd."TotalGramsOfBeans"::Int, extract(epoch FROM (hd."PeriodEndDate"))::INT) AS "SlopeGrams",
+			regr_intercept(hd."TotalGramsOfBeans"::Int, extract(epoch FROM (hd."PeriodEndDate"))::INT) AS "InterceptGrams"
+		FROM 
+			( SELECT * FROM CombinedMissionYieldsForPeriod cmyfp
+			) AS hd
 		where hd."TotalGramsOfBeans" > 0 and hd."TotalGramsOfBeans" > 0
 		group by
 			hd."ShelterID"
 	),
 	FuturePeriods
-	as
+	AS
 	(
-	select * from getFuturePeriods(NOW()::DATE, interval '1 month', 24) as t("PeriodNumber" INT, "PeriodStartDate" DATE, "PeriodEndDate" DATE, "NumPeriods" INT)
+	 SELECT * FROM getFuturePeriods(NOW()::DATE, interval '1 month', 24) AS t("PeriodNumber" INT, "PeriodStartDate" DATE, "PeriodEndDate" DATE, "NumPeriods" INT)
 	),
 	MissionYieldProjections
-	as
+	AS
 	(
-		select 
+		 SELECT 
 			rc."ShelterID",
 			fp."PeriodNumber", 
 			fp."PeriodStartDate", 
@@ -444,19 +368,13 @@ with
 			rc."SlopeGrams",
 			rc."InterceptCans",
 			rc."InterceptGrams",
-			(rc."SlopeCans" * extract(epoch from (fp."PeriodEndDate")::TIMESTAMP)::INT + rc."InterceptCans") as "ProjectedTotalNumberOfCans",
-			(rc."SlopeGrams" * extract(epoch from (fp."PeriodEndDate")::TIMESTAMP)::INT + rc."InterceptGrams") as "ProjectedTotalGramsOfBeans"
-		from 
+			(rc."SlopeCans" * extract(epoch FROM (fp."PeriodEndDate")::TIMESTAMP)::INT + rc."InterceptCans") AS "ProjectedTotalNumberOfCans",
+			(rc."SlopeGrams" * extract(epoch FROM (fp."PeriodEndDate")::TIMESTAMP)::INT + rc."InterceptGrams") AS "ProjectedTotalGramsOfBeans"
+		FROM 
 			RegressionCoefficientsForShelter24 rc
-			cross join FuturePeriods fp
+			CROSS JOIN FuturePeriods fp
 	)
---select * from RegressionCoefficientsForShelter24
-select * from MissionYieldProjections
---select 
---	cmyfp."ShelterID", cmyfp."PeriodStartDate", cmyfp."PeriodEndDate", cmyfp."PeriodNumber", cmyfp."EndDate", 
---	cmyfp."TotalNumberOfCans", cmyfp."TotalGramsOfBeans",
---	(extract(epoch from (cmyfp."PeriodEndDate")::TIMESTAMP)::INT) as x
---from CombinedMissionYieldsForPeriod cmyfp where cmyfp."ShelterID" = 24 order by cmyfp."PeriodEndDate"
+ SELECT * FROM MissionYieldProjections
 
 -- y = ax + b
 -- total number of beans = regr_slope(historical number of beans, periodEndDate) current currentDate + regr_intercept(historical number of beans, periodEndDate)
