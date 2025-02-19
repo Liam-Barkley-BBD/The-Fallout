@@ -8,6 +8,7 @@ on:
     branches:
       - dev
       - main
+      - rls
 
 jobs:
   migrate:
@@ -28,4 +29,9 @@ jobs:
             -user=${{ secrets.DB_USER }} \
             -password=${{ secrets.DB_PASS }} \
             -locations=filesystem:/flyway/migrations \
+            -placeholders.DB_NAME=${{ secrets.DB_NAME }} \
+            -placeholders.MANAGER_APP_PASS=${{ secrets.MANAGER_APP_PASS }} \
+            -placeholders.SURVIVOR_APP_PASS=${{ secrets.SURVIVOR_APP_PASS }} \
+            -placeholders.REPORTING_APP_PASS=${{ secrets.REPORTING_APP_PASS }} \
+            -placeholders.ADMIN_PASS=${{ secrets.ADMIN_PASS }} \
             migrate
