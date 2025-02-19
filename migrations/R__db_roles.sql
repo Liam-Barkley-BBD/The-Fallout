@@ -42,50 +42,50 @@ $$;
 ---------------------------------------------------------------
 -- ## GROUP
 CALL create_role(role_name => 'FalloutAdminGroup');
-ALTER ROLE FalloutAdminGroup WITH BYPASSRLS;
+ALTER ROLE "FalloutAdminGroup" WITH BYPASSRLS;
 
 -- ### DB LEVEL PERMISSIONS
 -- Allow creation of temporary tables on the database
 GRANT TEMPORARY
 ON DATABASE "${DB_NAME}" 
-TO FalloutAdminGroup;
+TO "FalloutAdminGroup";
 
 -- ### SCHEMA LEVEL PERMISSIONS
 -- Allow creation and usage of database objects in the public schema
 GRANT CREATE, USAGE
 ON SCHEMA public 
-TO FalloutAdminGroup;
+TO "FalloutAdminGroup";
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow all except deleting on all tables in the public schema
 GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRIGGER, MAINTAIN
 ON ALL TABLES IN SCHEMA public 
-TO FalloutAdminGroup;
+TO "FalloutAdminGroup";
 
 -- allow all (Execute) on all functions in the schema
 GRANT ALL
 ON ALL FUNCTIONS IN SCHEMA public 
-TO FalloutAdminGroup;
+TO "FalloutAdminGroup";
 
 -- allow all (Execute) on all procedures in the schema
 GRANT ALL 
 ON ALL PROCEDURES IN SCHEMA public 
-TO FalloutAdminGroup;
+TO "FalloutAdminGroup";
 
 -- allow all (Execute) on all routines in the schema
 GRANT ALL
 ON ALL ROUTINES IN SCHEMA public 
-TO FalloutAdminGroup;
+TO "FalloutAdminGroup";
 
 -- ## USER
-CALL create_role(role_name => 'FalloutAdmin', role_password => '${ADMIN_PASS}');
+CALL create_role(role_name => 'FalloutMaintainer', role_password => '${ADMIN_PASS}');
 
 GRANT CONNECT
 ON DATABASE "${DB_NAME}"
-TO FalloutAdmin;
+TO "FalloutMaintainer";
 
-GRANT FalloutAdminGroup 
-TO FalloutAdmin;
+GRANT "FalloutAdminGroup" 
+TO "FalloutMaintainer";
 
 ---------------------------------------------------------------
 -- # MANAGER SECTION
@@ -100,33 +100,33 @@ CALL create_role(role_name => 'ManagerGroup');
 -- Allow usage of objects in the public schema
 GRANT USAGE
 ON SCHEMA public
-TO ManagerGroup;
+TO "ManagerGroup";
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow select, insert, and update on all tables in public schema
 GRANT SELECT, INSERT, UPDATE
 ON ALL TABLES IN SCHEMA public
-TO ManagerGroup;
+TO "ManagerGroup";
 
 -- Allow all on all functions in public schema
 GRANT ALL
 ON ALL FUNCTIONS IN SCHEMA public
-TO ManagerGroup;
+TO "ManagerGroup";
 
 -- Allow all on all procedures in public schema
 GRANT ALL
 ON ALL PROCEDURES IN SCHEMA public
-TO ManagerGroup;
+TO "ManagerGroup";
 
 -- ## USER
 CALL create_role(role_name => 'ManagerApp', role_password => '${MANAGER_APP_PASS}');
 
 GRANT CONNECT
 ON DATABASE "${DB_NAME}"
-TO ManagerApp;
+TO "ManagerApp";
 
-GRANT ManagerGroup 
-TO ManagerApp;
+GRANT "ManagerGroup" 
+TO "ManagerApp";
 
 ---------------------------------------------------------------
 -- # SURVIVOR SECTION
@@ -141,33 +141,33 @@ CALL create_role(role_name => 'SurvivorGroup');
 -- allow usage of public schema
 GRANT USAGE
 ON SCHEMA public
-TO SurvivorGroup;
+TO "SurvivorGroup";
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow select, insert, and update on all tables in public schema
 GRANT SELECT, INSERT, UPDATE
 ON ALL TABLES IN SCHEMA public
-TO SurvivorGroup;
+TO "SurvivorGroup";
 
 -- allow all on all functions in public schema
 GRANT ALL PRIVILEGES
 ON ALL FUNCTIONS IN SCHEMA public
-TO SurvivorGroup;
+TO "SurvivorGroup";
 
 -- allow all on all procedures in public schema
 GRANT ALL PRIVILEGES
 ON ALL PROCEDURES IN SCHEMA public
-TO SurvivorGroup;
+TO "SurvivorGroup";
 
 -- ## USER
 CALL create_role(role_name => 'SurvivorApp', role_password => '${SURVIVOR_APP_PASS}');
 
 GRANT CONNECT
 ON DATABASE "${DB_NAME}"
-TO SurvivorApp;
+TO "SurvivorApp";
 
-GRANT SurvivorGroup 
-TO SurvivorApp;
+GRANT "SurvivorGroup" 
+TO "SurvivorApp";
 
 ---------------------------------------------------------------
 -- # REPORTING SECTION
@@ -182,19 +182,22 @@ CALL create_role(role_name => 'ReportingGroup');
 -- allow usage of public schema
 GRANT USAGE
 ON SCHEMA public
-TO ReportingGroup;
+TO "ReportingGroup";
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow select only on all tables
 GRANT SELECT
 ON ALL TABLES IN SCHEMA public
-TO ReportingGroup;
+TO "ReportingGroup";
 
 -- ## USER
 CALL create_role(role_name => 'ReportingApp', role_password => '${REPORTING_APP_PASS}');
 
-GRANT CONNECT ON DATABASE "${DB_NAME}" TO ReportingApp;
-GRANT ReportingGroup TO ReportingApp;
+GRANT CONNECT ON DATABASE "${DB_NAME}"
+TO "ReportingApp";
+
+GRANT "ReportingGroup" 
+TO "ReportingApp";
 
 ---------------------------------------------------------------
 -- # CLEANUP
