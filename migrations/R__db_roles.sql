@@ -58,7 +58,7 @@ TO "FalloutAdminGroup";
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow all except deleting on all tables in the public schema
-GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRIGGER, MAINTAIN
+GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRIGGER
 ON ALL TABLES IN SCHEMA public 
 TO "FalloutAdminGroup";
 
