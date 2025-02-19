@@ -33,9 +33,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER ValidateBeanRequest
+CREATE OR REPLACE TRIGGER ValidateBeanRequest
 BEFORE INSERT OR UPDATE ON "BeanRequests"
 FOR EACH ROW EXECUTE FUNCTION ValidateBeanRequestData();
+
+DROP PROCEDURE MakeBeanRequest;
 
 CREATE OR REPLACE PROCEDURE MakeBeanRequest(
     IN P_SurvivorID INTEGER,
@@ -58,6 +60,8 @@ BEGIN
 END;
 $$;
 
+DROP PROCEDURE UpdateBeanRequest;
+
 CREATE OR REPLACE PROCEDURE UpdateBeanRequest(
     IN P_BeanRequestID INTEGER,
     IN P_SurvivorID INTEGER DEFAULT NULL,
@@ -75,12 +79,14 @@ BEGIN
     WHERE "BeanRequestID" = P_BeanRequestID;
 
     -- Success! :)
-    RAISE NOTICE 'Successfully updated BeanRequestID %', P_BeanRequestID;
+    RAISE NOTICE 'Successfully updated BeanRequestID %',
+    P_BeanRequestID;
 
     EXCEPTION
         WHEN others THEN
             ROLLBACK;
-            RAISE EXCEPTION 'Error updating bean request: %', SQLERRM;
+            RAISE EXCEPTION 'Error updating bean request: %',
+            SQLERRM;
 END;
 $$;
 
@@ -115,29 +121,5 @@ BEGIN
         P_RequestID,
         P_ProcessDate => CURRENT_DATE
     );
-
-    SELECT "SurvivorID" INTO V_SurvivorID FROM "BeanRequests"
-    WHERE "BeanRequestID" = P_RequestID LIMIT 1;
-
-    V_ShelterID := GetShelter(V_SurvivorID);
-
-    FOR rec IN
-        SELECT "CannedBeanID", "NumberOfCans"
-        FROM "BeanRequestItem"
-        WHERE "BeanRequestID" = P_RequestID 
-    LOOP
-        FOR V_SupplyID IN
-            SELECT "BeanSupplyID" FROM "BeanSupplies"
-            WHERE "ShelterID" = V_ShelterID
-            AND "CannedBeanID" = rec."CannedBeanID"
-            AND "ConsumedDate" IS NULL
-            LIMIT rec."NumberOfCans"
-        LOOP
-            CALL UpdateBeanSupply(
-                V_SupplyID,
-                P_ConsumedDate => CURRENT_DATE
-            );
-        END LOOP;
-    END LOOP;
 END;
 $$;
