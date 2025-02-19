@@ -7,10 +7,10 @@ WITH
             BM."ShelterID",
             DATE_TRUNC('week', BM."EndDate")::DATE AS "WeekStart",
             (DATE_TRUNC('week', BM."EndDate") + INTERVAL '6 days')::DATE AS "WeekEnd",
-            SUM(MY."NumberOfCans" * C."Grams") / 1000 AS "TotalYieldKg"
+            SUM(MY."NumberOfCans" * CB."Grams") / 1000 AS "TotalYieldKg"
         FROM "BeanMissions" BM
         INNER JOIN "MissionYieldItems" MY ON BM."BeanMissionID" = MY."BeanMissionID"
-        INNER JOIN "CannedBeans" C ON MY."CannedBeanID" = C."CannedBeanID"
+        INNER JOIN "CannedBeans" CB ON MY."CannedBeanID" = CB."CannedBeanID"
         WHERE BM."EndDate" >= CURRENT_DATE - (SELECT MonthsInterval FROM TimePeriod)
         GROUP BY BM."ShelterID", "WeekStart", "WeekEnd"
     ),
@@ -19,15 +19,15 @@ WITH
             SS."ShelterID",
             DATE_TRUNC('week', BQ."RequestDate")::DATE AS "WeekStart",
             (DATE_TRUNC('week', BQ."RequestDate") + INTERVAL '6 days')::DATE AS "WeekEnd",
-            SUM(BR."NumberOfCans" * C."Grams") / 1000 AS "TotalRequestedKg"
+            SUM(BR."NumberOfCans" * CB."Grams") / 1000 AS "TotalRequestedKg"
         FROM "BeanRequests" BQ
         INNER JOIN "BeanRequestItem" BR ON BQ."BeanRequestID" = BR."BeanRequestID"
-        INNER JOIN "CannedBeans" C ON BR."CannedBeanID" = C."CannedBeanID"
+        INNER JOIN "CannedBeans" CB ON BR."CannedBeanID" = CB."CannedBeanID"
         INNER JOIN "ShelterSurvivors" SS ON BQ."SurvivorID" = SS."SurvivorID"
         WHERE BQ."RequestDate" >= CURRENT_DATE - (SELECT MonthsInterval FROM TimePeriod)
         GROUP BY SS."ShelterID", "WeekStart", "WeekEnd"
     )
-SELECT 
+SELECT
     COALESCE(WY."ShelterID", WR."ShelterID") AS "ShelterID",
     COALESCE(WY."WeekStart", WR."WeekStart") AS "WeekStart",
     COALESCE(WY."WeekEnd", WR."WeekEnd") AS "WeekEnd",
