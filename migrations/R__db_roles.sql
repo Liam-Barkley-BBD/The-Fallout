@@ -104,8 +104,12 @@ TO "ManagerGroup";
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow select, insert, and update on all tables in public schema
-GRANT SELECT, INSERT, UPDATE
+GRANT SELECT, INSERT
 ON ALL TABLES IN SCHEMA public
+TO "ManagerGroup";
+
+GRANT UPDATE
+ON TABLE "BeanMissions", "BeanRequests", "BeanSupplies", "CannedBeans", "ShelterSurvivors", "Shelters", "Survivors"
 TO "ManagerGroup";
 
 -- Allow all on all functions in public schema
@@ -145,8 +149,12 @@ TO "SurvivorGroup";
 
 -- ### OBJECT LEVEL PERMISSIONS
 -- allow select, insert, and update on all tables in public schema
-GRANT SELECT, INSERT, UPDATE
+GRANT SELECT
 ON ALL TABLES IN SCHEMA public
+TO "SurvivorGroup";
+
+GRANT INSERT
+ON TABLE "BeanRequests", "BeanRequestItems"
 TO "SurvivorGroup";
 
 -- allow all on all functions in public schema
