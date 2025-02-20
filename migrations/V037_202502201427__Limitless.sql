@@ -74,3 +74,48 @@ BEGIN
             SQLERRM;
 END;
 $$;
+
+CREATE OR REPLACE PROCEDURE ResetBottlecaps(
+    IN P_ShelterID INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    V_Decom DATE;
+    V_Allow INTEGER;
+    rec RECORD;
+BEGIN
+
+    IF NOT IdExists(P_ShelterID, 'ShelterID', 'Shelters') THEN
+        RAISE EXCEPTION 'Shelter % does not exist', P_ShelterID;
+    END IF;
+
+    SELECT "DecommissionDate" INTO V_Decom FROM "Shelters"
+    WHERE "ShelterID" = P_ShelterID LIMIT 1;
+
+    IF V_Decom IS NOT NULL THEN
+        RAISE EXCEPTION 'Shelter % has been decommissioned', P_ShelterID;
+    END IF;
+
+    SELECT "BottleCapAllowance" INTO V_Allow FROM "Shelters"
+    WHERE "ShelterID" = P_ShelterID LIMIT 1;
+
+    FOR
+        rec IN SELECT * FROM "ShelterSurvivors"
+        WHERE "ShelterID" = P_ShelterID
+    LOOP
+        UPDATE "BottleCaps"
+        SET "Quantity" = V_Allow
+        WHERE "SurvivorID" = rec."SurvivorID";
+    END LOOP;
+
+    RAISE NOTICE 'Successfully reset weekly bottlecaps for Shelter %',
+    P_ShelterID;
+
+    EXCEPTION
+        WHEN others THEN
+            ROLLBACK;
+            RAISE EXCEPTION 'Error resetting weekly bottlecaps: %',
+            SQLERRM;
+END;
+$$;
