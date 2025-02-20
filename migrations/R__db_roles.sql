@@ -157,6 +157,10 @@ GRANT INSERT
 ON TABLE "BeanRequests", "BeanRequestItems"
 TO "SurvivorGroup";
 
+GRANT UPDATE
+ON TABLE "BottleCaps"
+TO "SurvivorGroup";
+
 -- allow all on all functions in public schema
 GRANT ALL PRIVILEGES
 ON ALL FUNCTIONS IN SCHEMA public
