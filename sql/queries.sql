@@ -5,13 +5,13 @@ WITH
     WeeklyYielded AS (
         SELECT 
             BM."ShelterID",
-            DATE_TRUNC('week', BM."EndDate")::DATE AS "WeekStart",
-            (DATE_TRUNC('week', BM."EndDate") + INTERVAL '6 days')::DATE AS "WeekEnd",
+            DATE_TRUNC('week', BM."YieldDate")::DATE AS "WeekStart",
+            (DATE_TRUNC('week', BM."YieldDate") + INTERVAL '6 days')::DATE AS "WeekEnd",
             SUM(MY."NumberOfCans" * CB."Grams") / 1000 AS "TotalYieldKg"
         FROM "BeanMissions" BM
         INNER JOIN "MissionYieldItems" MY ON BM."BeanMissionID" = MY."BeanMissionID"
         INNER JOIN "CannedBeans" CB ON MY."CannedBeanID" = CB."CannedBeanID"
-        WHERE BM."EndDate" >= CURRENT_DATE - (SELECT MonthsInterval FROM TimePeriod)
+        WHERE BM."YieldDate" >= CURRENT_DATE - (SELECT MonthsInterval FROM TimePeriod)
         GROUP BY BM."ShelterID", "WeekStart", "WeekEnd"
     ),
     WeeklyRequested AS (
