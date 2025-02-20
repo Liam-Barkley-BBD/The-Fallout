@@ -109,7 +109,7 @@ ON ALL TABLES IN SCHEMA public
 TO "ManagerGroup";
 
 GRANT UPDATE
-ON TABLE "BeanMissions", "BeanRequests", "BeanSupplies", "CannedBeans", "ShelterSurvivors", "Shelters", "Survivors"
+ON TABLE "BeanMissions", "BeanRequests", "BeanSupplies", "CannedBeans", "ShelterSurvivors", "Shelters", "Survivors", "BottleCaps"
 TO "ManagerGroup";
 
 -- Allow all on all functions in public schema
