@@ -1,0 +1,13 @@
+DROP PROCEDURE IF EXISTS DeleteBeanRequest;
+DROP PROCEDURE IF EXISTS DeleteBeanRequestItem;
+DROP PROCEDURE IF EXISTS DeleteCannedBean;
+DROP PROCEDURE IF EXISTS DeleteBeanSupply;
+DROP PROCEDURE IF EXISTS UpdateBeanRequest;
+DROP PROCEDURE IF EXISTS UpdateBeanRequestItem;
+DROP PROCEDURE IF EXISTS UpdateNumberOfCans;
+
+DROP VIEW IF EXISTS ApprovedBeanRequests;
+DROP VIEW IF EXISTS ShelterTotalBeans;
+DROP VIEW IF EXISTS ShelterBeanTypeCount;
+DROP VIEW IF EXISTS SurvivorPendingBeanRequests;
+
